@@ -4,6 +4,7 @@ Utility functions related to databases.
 # TransactionManagementError used below actually *does* derive from the standard "Exception" class.
 # pylint: disable=nonstandard-exception
 from functools import wraps
+from importlib import import_module
 import random
 
 from django.db import DEFAULT_DB_ALIAS, DatabaseError, Error, transaction
@@ -231,3 +232,16 @@ def generate_int_id(minimum=0, maximum=MYSQL_MAX_INT, used_ids=None):
         cid = random.randint(minimum, maximum)
 
     return cid
+
+
+class MigrationModules(object):
+    """
+     Return invalid migrations modules for apps. Used for disabling migrations during tests.
+     See https://groups.google.com/d/msg/django-developers/PWPj3etj3-U/kCl6pMsQYYoJ.
+    """
+
+    def __contains__(self, item):
+        return True
+
+    def __getitem__(self, item):
+        return "notmigrations"
