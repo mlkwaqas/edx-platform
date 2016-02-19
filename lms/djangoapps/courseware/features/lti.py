@@ -316,7 +316,10 @@ def see_elem_text(_step, elem, text):
         'description': '.lti-description'
     }
     assert_in(elem, selector_map)
-    assert_true(world.css_has_text(selector_map[elem], text))
+    """
+    Uppercasing the text here to match new CSS headers, which are uppercase
+    """
+    assert_true(world.css_has_text(selector_map[elem], text.upper()))
 
 
 @step('I see text "([^"]*)"$')
