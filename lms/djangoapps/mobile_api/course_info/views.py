@@ -6,7 +6,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 
 from courseware.courses import get_course_info_section_module
-from static_replace import make_static_urls_absolute, replace_static_urls
+from static_replace import make_static_urls_absolute, replace_static_urls, replace_jump_to_id_urls, replace_course_urls
 from openedx.core.lib.xblock_utils import get_course_update_items
 
 from ..utils import mobile_view, mobile_course_access
@@ -87,6 +87,15 @@ class CourseHandoutsList(generics.ListAPIView):
                     handouts_html,
                     course_id=course.id,
                     static_asset_path=course.static_asset_path
+                )
+                handouts_html = replace_jump_to_id_urls(
+                    handouts_html,
+                    course_id=course.id,
+                    jump_to_id_base_url="/courses/{}/jump_to_id/".format(course.id)
+                )
+                handouts_html = replace_course_urls(
+                    handouts_html,
+                    course_key=course.id
                 )
                 handouts_html = make_static_urls_absolute(self.request, handouts_html)
             return Response({'handouts_html': handouts_html})
