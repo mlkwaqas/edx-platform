@@ -4,9 +4,10 @@ Views for course info API
 from django.http import Http404
 from rest_framework import generics
 from rest_framework.response import Response
+from xblock.fragment import Fragment
 
 from courseware.courses import get_course_info_section_module
-from static_replace import make_static_urls_absolute, replace_static_urls, replace_jump_to_id_urls, replace_course_urls
+from static_replace import make_static_urls_absolute
 from openedx.core.lib.xblock_utils import get_course_update_items
 
 from ..utils import mobile_view, mobile_course_access
@@ -47,10 +48,7 @@ class CourseUpdatesList(generics.ListAPIView):
 
         for item in updates_to_show:
             content = item['content']
-            content = replace_static_urls(
-                content,
-                course_id=course.id,
-                static_asset_path=course.static_asset_path)
+            content = course_updates_module.system.replace_urls(content)
             item['content'] = make_static_urls_absolute(request, content)
 
         return Response(updates_to_show)
@@ -83,21 +81,10 @@ class CourseHandoutsList(generics.ListAPIView):
                 handouts_html = None
             else:
                 handouts_html = course_handouts_module.data
-                handouts_html = replace_static_urls(
-                    handouts_html,
-                    course_id=course.id,
-                    static_asset_path=course.static_asset_path
-                )
-                handouts_html = replace_jump_to_id_urls(
-                    handouts_html,
-                    course_id=course.id,
-                    jump_to_id_base_url="/courses/{}/jump_to_id/".format(course.id)
-                )
-                handouts_html = replace_course_urls(
-                    handouts_html,
-                    course_key=course.id
-                )
-                handouts_html = make_static_urls_absolute(self.request, handouts_html)
+                frag = Fragment(content=handouts_html)
+                for wrapper in course_handouts_module.system.wrappers:
+                    frag = wrapper(block=course_handouts_module, view=None, frag=frag, context=None)
+                handouts_html = frag.content
             return Response({'handouts_html': handouts_html})
         else:
             # course_handouts_module could be None if there are no handouts
