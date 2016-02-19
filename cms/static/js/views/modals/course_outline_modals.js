@@ -737,10 +737,11 @@ define(['jquery', 'backbone', 'underscore', 'gettext', 'js/views/baseview',
             if (xblockInfo.isChapter()) {
                 editors = [ReleaseDateEditor, StaffLockEditor];
             } else if (xblockInfo.isSequential()) {
+                editors = [ReleaseDateEditor, GradingEditor, DueDateEditor, StaffLockEditor]
                 tabs.push({
                     name: 'basic',
                     displayName: gettext('Basic'),
-                    editors: [ReleaseDateEditor, GradingEditor, DueDateEditor, StaffLockEditor]
+                    editors: editors
                 });
 
                 if (options.enable_proctored_exams || options.enable_timed_exams) {
